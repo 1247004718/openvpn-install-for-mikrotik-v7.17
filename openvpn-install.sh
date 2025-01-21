@@ -38,7 +38,7 @@ Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS and Fedora.
 	exit
 fi
 
-if [[ "$os" == "ubuntu" && "$os_version" -lt 2204 ]]; then
+if [[ "$os" == "ubuntu" && "$os_version" -lt 1904 ]]; then
 	echo "Ubuntu 22.04 or higher is required to use this installer.
 This version of Ubuntu is too old and unsupported."
 	exit
@@ -258,15 +258,15 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 	openvpn --genkey secret /etc/openvpn/server/tc.key
 	# Create the DH parameters file using the predefined ffdhe2048 group
 	echo '-----BEGIN DH PARAMETERS-----
-MIIBCAKCAQEA//////////+t+FRYortKmq/cViAnPTzx2LnFg84tNpWp4TZBFGQz
-+8yTnc4kmz75fS/jY2MMddj2gbICrsRhetPfHtXV/WVhJDP1H18GbtCFY2VVPe0a
-87VXE15/V8k1mE8McODmi3fipona8+/och3xWKE2rec1MKzKT0g6eXq8CrGCsyT7
-YdEIqUuyyOP7uWrat2DX9GgdT0Kj3jlN9K5W7edjcrsZCwenyO4KbXCeAvzhzffi
-7MA0BM0oNC9hkXL+nOmFg/+OTxIy7vKBg8P+OxtMb61zO7X8vC7CIAXFjvGDfRaD
-ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
+MIIBCAKCAQEAkpSQeMApbx3mx0uMSPlJ7UmvHbYou3J3yof+mClqA5p5yYHstaVf
+ZjELeQegJb8TQlvOGP58DT5bSvYhVscQTtQmkAhS2Gr+fDCCrkmjUq0OZSvvDc9F
+kmoQnYiqn9Ly74c+IpjXeMkjaVG6xzo+QLW3TtMoyMhzjhNXtSJjPIhG0UyqpNrz
+oi5VDUK4sksfBre/TrbSJpvoiret2V4SdxaLDdUXiymqC+CuJphstGMWRUlJzJZT
+RSXWFGE23xNmjEiB3WJzzMbgH9+F9WmgCuH5TW0Hj4Iei1gPhlzGKDsMZQEieiVe
+FWn9xyAZxb3Apqr/tJwYmitSNhZpCOX/+wIBAg==
 -----END DH PARAMETERS-----' > /etc/openvpn/server/dh.pem
 	# Generate server.conf
-	echo "local $ip
+	echo "local 0.0.0.0
 port $port
 proto $protocol
 dev tun
@@ -274,8 +274,12 @@ ca ca.crt
 cert server.crt
 key server.key
 dh dh.pem
-auth SHA512
+auth SHA256
+cipher AES-256-GCM
 tls-crypt tc.key
+client-to-client
+tls-server
+remote-cert-tls client
 topology subnet
 server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 	# IPv6
@@ -322,7 +326,7 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 			echo 'push "dhcp-option DNS 94.140.15.15"' >> /etc/openvpn/server/server.conf
 		;;
 	esac
-	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
+#	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
 	echo "keepalive 10 120
 user nobody
 group $group_name
@@ -416,8 +420,12 @@ nobind
 persist-key
 persist-tun
 remote-cert-tls server
-auth SHA512
-ignore-unknown-option block-outside-dns
+auth SHA256
+cipher AES-256-GCM
+pull
+user openvpn
+group openvpn
+key-direction 1
 verb 3" > /etc/openvpn/server/client-common.txt
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
