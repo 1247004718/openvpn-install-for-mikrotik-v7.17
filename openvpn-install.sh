@@ -428,9 +428,9 @@ user openvpn
 group openvpn
 key-direction 1
 verb 3" > /etc/openvpn/server/client-common.txt
-if [[ "$protocol" = "udp" ]]; then
-	echo "explicit-exit-notify 1" >> /etc/openvpn/server/client-common.txt
-fi
+#if [[ "$protocol" = "udp" ]]; then
+#	echo "explicit-exit-notify 1" >> /etc/openvpn/server/client-common.txt
+#fi
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
