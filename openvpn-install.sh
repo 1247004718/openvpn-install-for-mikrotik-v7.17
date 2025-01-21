@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2013 Nyr. Released under the MIT License.
 
+# edited by 1247004718 on 2025-01-21
 
 # Detect Debian users running the script with "sh" instead of bash
 if readlink /proc/$$/exe | grep -q "dash"; then
